@@ -1,0 +1,278 @@
+---
+title: "Assingment_1_ML"
+author: "Harika Panuganty"
+date: "7/4/2019"
+output: html_document
+---
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(plyr)
+library(dplyr)
+library(lubridate)
+```
+
+
+```{r}
+
+#Section1 EMR Bots 30-day Readmission Study
+
+#Q1
+#Read in encounter_info csv 
+patient_encounter_info <- read.csv("~/Desktop/datasets/encounter_info.csv")
+
+#Read in readmission_outcome csv
+patient_readmission_outcome <- read.csv("~/Desktop/datasets/readmission_outcome.csv")
+
+#Merge both datasets
+merged.data <- merge(patient_encounter_info, patient_readmission_outcome, by="Encounter_ID")
+
+#dataset based on outcome == 1 30day readmission
+merged.data.readmitted <- filter(merged.data, outcome == 1)
+
+#dataset based on outcome == 0 w/o 30day readmission
+merged.data.not.readmitted <- filter(merged.data, outcome == 0)
+
+#Age, years, mean (sd) of readmitted pts 30 days
+mean.age.readmitted <- mean(merged.data.readmitted$PatientEncounterAge)
+mean.age.readmitted
+
+#sd of readmitted pts 30 days
+sd.age.readmitted <- sd(merged.data.readmitted$PatientEncounterAge)
+sd.age.readmitted
+
+#Age, years, mean(sd) of not readmitted 30 days
+mean.age.not.readmitted <- mean(merged.data.not.readmitted$PatientEncounterAge)
+mean.age.not.readmitted
+
+#sd of not readmitted pts 30 days
+sd.age.not.readmitted <- sd(merged.data.not.readmitted$PatientEncounterAge)
+sd.age.not.readmitted
+
+#n  male readmissions 
+male_readmissions <- merged.data.readmitted %>%
+  filter(PatientGender == "Male") %>%
+  filter(outcome == 1) %>%
+  nrow()
+male_readmissions
+
+#n male not readmissions
+male_not_readmissions <- merged.data.not.readmitted %>%
+  filter(PatientGender == "Male") %>%
+  filter(outcome == 0) %>%
+  nrow()
+male_not_readmissions
+
+#n female readmissions
+female_readmissions <- merged.data.readmitted %>%
+  filter(PatientGender == "Female") %>%
+  filter(outcome == 1) %>%
+  nrow()
+female_readmissions
+
+#n female not readmissions 
+female_not_readmissions <- merged.data.not.readmitted %>%
+  filter(PatientGender == "Female") %>%
+  filter(outcome == 0) %>%
+  nrow()
+female_not_readmissions
+
+#n black people readmissions
+black_readmissions <- merged.data.readmitted %>%
+  filter(PatientRace == "African American") %>%
+  filter(outcome == 0) %>%
+  nrow()
+black_readmissions
+
+#n black people not readmissions
+black_not_readmissions <- merged.data.not.readmitted %>%
+  filter(PatientRace == "African American") %>%
+  filter(outcome == 1) %>%
+  nrow()
+black_not_readmissions
+
+#n white readmissions 
+white_readmissions <- merged.data.readmitted %>%
+  filter(PatientRace == "White") %>%
+  filter(outcome == 1) %>%
+  nrow()
+white_readmissions
+
+#n white not readmissions
+white_not_readmissions <- merged.data.not.readmitted %>%
+  filter(PatientRace == "White") %>%
+  filter(outcome == 0) %>%
+  nrow()
+white_not_readmissions
+
+#n asian readmissions 
+asian_readmissions <- merged.data.readmitted %>%
+  filter(PatientRace == "Asian") %>%
+  filter(outcome == 1) %>%
+  nrow()
+asian_readmissions
+
+#n asian not readmissions 
+asian_not_readmissions <- merged.data.not.readmitted %>%
+  filter(PatientRace == "Asian") %>%
+  filter(outcome == 0) %>%
+  nrow()
+asian_not_readmissions
+
+#n unknown readmissions 
+unknown_readmissions <- merged.data.readmitted %>%
+  filter(PatientRace == "Unknown") %>%
+  filter(outcome == 1) %>%
+  nrow()
+unknown_readmissions
+
+#n unknown not readmissions 
+unknown_not_readmissions <- merged.data.not.readmitted %>%
+  filter(PatientRace == "Unknown") %>%
+  filter(outcome == 0) %>%
+  nrow()
+unknown_not_readmissions
+
+
+#p-value for Age, years, mean (sd)
+age.p.value <- t.test(merged.data.readmitted$PatientEncounterAge, merged.data.not.readmitted$PatientEncounterAge)
+age.p.value
+
+#p-value for gender male: 0.6161
+gender.p.value.male <- t.test(merged.data.readmitted$PatientGender == "Male", merged.data.not.readmitted$PatientGender == "Male")
+gender.p.value.male
+
+#p-value for gender female: 0.6161
+gender.p.value.female <- t.test(merged.data.readmitted$PatientGender == "Female", merged.data.not.readmitted$PatientGender == "Female")
+gender.p.value.female 
+
+#p-value for race : 
+black.p.value <- chisq.test(merged.data$PatientRace, merged.data$outcome)
+black.p.value 
+
+
+
+```
+
+```{r}
+
+library(plyr)
+library(dplyr)
+library(lubridate)
+library(anytime)
+library(forcats)
+
+#correcting century code 
+correct_century <- function(x, year=1919){
+  m <- year(x) %% 100
+  year(x) <- ifelse(m > year %% 100, 1900+m, 2000+m)
+  x
+}
+
+
+#Section 1: Q2
+#Read in encounter_labs csv 
+patient_lab_info <- read.csv("~/Desktop/datasets/encounter_labs.csv")
+
+patient_lab_info <- patient_lab_info %>%
+  mutate(Lab_DTTM = correct_century(mdy_hm(Lab_DTTM)))
+ 
+
+#Read in encounter_info csv 
+patient_encounter_info <- read.csv("~/Desktop/datasets/encounter_info.csv")
+
+#Read in readmission_outcome csv
+patient_readmission_outcome <- read.csv("~/Desktop/datasets/readmission_outcome.csv")
+
+
+recent_labs <- patient_lab_info%>%
+  group_by(Encounter_ID)%>% 
+  slice(which.max(Lab_DTTM))
+
+
+#merge patient encounter and outcome tables by encounter_ID (common denominator for all 3)
+encounter.merge = merge(patient_encounter_info, patient_readmission_outcome, by= "Encounter_ID", all = TRUE)
+
+#merge encounter.merge with recent_labs to create feature dataset
+feature_dataset = merge(encounter.merge, recent_labs, by="Encounter_ID", all = TRUE)
+
+#remove unwanted columns
+feature_dataset.new <- select(feature_dataset, -c("Patient_ID", "AdmissionEndDate"))
+
+#remove NA values from new feature dataset
+feature_dataset.new <- feature_dataset.new[complete.cases(feature_dataset.new), ]
+
+summary(feature_dataset.new)
+
+```
+
+```{r}
+#Section 1: Q3
+#create feature_dataset.2004 to add column for year
+
+feature_dataset.2004 = feature_dataset.new%>%
+  mutate(AdmitYear = ymd_hms(AdmissionStartDate))%>%
+  mutate_at(vars(AdmitYear), funs(year))
+  
+#Training (years <= 2004)
+training_data <- feature_dataset.2004[feature_dataset.2004$AdmitYear <= "2004", ]
+testing_data <- feature_dataset.2004[feature_dataset.2004$AdmitYear > "2004", ]
+#training_data.outcome <- as.integer(training_data$outcome)  #looking for pts died within 30 days
+
+#training_data.outcome == "1"
+#training_data.outcome == "0"
+#summary(training_data.outcome)
+
+#pts from train readmitted within 30 days
+training_data%>%
+  group_by(AdmitYear, outcome) %>%
+  filter(AdmitYear <= "2004", outcome == 1) %>%
+  select(AdmitYear, outcome) %>%
+  summarise(count=n())%>%
+  mutate(summarise=sum(count))
+
+#pts from train not readmitted within 30 days
+training_data%>%
+  group_by(AdmitYear, outcome) %>%
+  filter(AdmitYear <= "2004", outcome == 0) %>%
+  select(AdmitYear, outcome) %>%
+  summarise(count=n())%>%
+  mutate(summarise=sum(count))
+
+#pts from test data readmitted within 30 days 
+testing_data%>%
+  group_by(AdmitYear, outcome) %>%
+  filter(AdmitYear > "2004", outcome == 1) %>%
+  select(AdmitYear, outcome) %>%
+  summarise(count=n())%>%
+  mutate(summarise=sum(count))
+
+#pts from test data not readmitted within 30 days 
+testing_data%>%
+  group_by(AdmitYear, outcome) %>%
+  filter(AdmitYear > "2004", outcome == 0) %>%
+  select(AdmitYear, outcome) %>%
+  summarise(count=n())%>%
+  mutate(summarise=sum(count))
+
+
+```
+
+```{r}
+#removing unwanted columns in testing and training datasets
+training_data.new <- select(training_data, -c("AdmissionStartDate",  "AdmitYear"))
+
+testing_data.new <- select(testing_data, -c("AdmissionStartDate", "AdmitYear"))
+
+write.csv(training_data.new, "~/Desktop/readmission_training.csv")
+write.csv(testing_data.new, "~/Desktop/readmission_testing.csv")
+
+
+
+```
+

@@ -1,0 +1,252 @@
+---
+title: "Assignment1_ML_Q2"
+author: "Harika Panuganty"
+date: "7/10/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(plyr)
+library(dplyr)
+library(lubridate)
+```
+
+
+```{r}
+
+#Would like to note that as it was not specified in the dict, I chose DAY30 outcome 0 as dead and DAY30 outcome 1 as alive. 
+
+#Q1
+#Read in readmission_outcome csv
+gusto_readmission <- read.csv("~/Desktop/datasets/gusto_data.csv")
+
+#summary(gusto_readmission)
+
+#dataset based on alive outcome == 1
+gusto.alive <- filter(gusto_readmission, DAY30 == 1)
+
+#dataset based on dead outcome == 0
+gusto.dead <- filter(gusto_readmission, DAY30 == 0)
+
+#Age, years, mean (sd) of pts who died within 30 days 
+mean.gusto.dead <- mean(gusto.dead$AGE)
+mean.gusto.dead
+
+#sd of pts who died within 30 days
+sd.gusto.dead <- sd(gusto.dead$AGE)
+sd.gusto.dead
+
+#Age, years, mean (sd) of pts w/o readmission 30 days
+mean.gusto.alive <- mean(gusto.alive$AGE)
+mean.gusto.alive
+
+#sd of pts w/o readmission 30 days
+sd.gusto.alive <- sd(gusto.alive$AGE)
+sd.gusto.alive
+
+#n male pts died within 30 days
+male_dead <- gusto.dead %>%
+  filter(SEX == 0) %>%
+  filter(DAY30 == 0) %>%
+  nrow()
+male_dead
+
+#n male pts alive at 30 days
+male_alive <- gusto.alive %>%
+  filter(SEX == 0) %>%
+  filter(DAY30 == 1) %>%
+  nrow()
+male_alive
+
+#n female pts died within 30 days
+female_dead <- gusto.dead %>%
+  filter(SEX == 1) %>%
+  filter(DAY30 == 0) %>%
+  nrow()
+female_dead
+
+#n female pts alive at 30 days
+female_alive <- gusto.alive %>%
+  filter(SEX == 1) %>%
+  filter(DAY30 == 1) %>%
+  nrow()
+female_alive
+
+#n sample2 pts dead within 30 days
+sample2_dead <- gusto.dead %>%
+  filter(GROUP == "sample2") %>%
+  filter(DAY30 == 0) %>%
+  nrow()
+sample2_dead
+
+#n sample2 pts alive at 30 days
+sample2_alive <- gusto.alive %>%
+  filter(GROUP == "sample2") %>%
+  filter(DAY30 == 1) %>%
+  nrow()
+sample2_alive
+
+#n sample4 pts dead within 30 days
+sample4_dead <- gusto.dead %>%
+  filter(GROUP == "sample4") %>%
+  filter(DAY30 == 0) %>%
+  nrow()
+sample4_dead
+
+#n sample4 pts alive at 30 days
+sample4_alive <- gusto.alive %>%
+  filter(GROUP == "sample4") %>%
+  filter(DAY30 == 1) %>%
+  nrow()
+sample4_alive
+
+#n sample 5 pts dead within 30 days    
+sample5_dead <- gusto.dead %>%
+  filter(GROUP == "sample5") %>%
+  filter(DAY30 == 0) %>%
+  nrow()
+sample5_dead
+  
+#n sample5 pts alive at 30 days
+sample5_alive <- gusto.alive %>%
+  filter(GROUP == "sample5") %>%
+  filter(DAY30 == 1) %>%
+  nrow()
+sample5_alive
+
+#n west pts dead within 30 days
+west_dead <- gusto.dead %>%
+  filter(GROUP == "west") %>%
+  filter(DAY30 == 0) %>%
+  nrow()
+west_dead
+
+#n west pts alive at 30 days
+west_alive <- gusto.alive %>%
+  filter(GROUP == "west") %>%
+  filter(DAY30 == 1) %>%
+  nrow()
+west_alive
+
+#p-value for Age, years, mean (sd) <2.2e-16
+gusto.age.p.value <- t.test(gusto.alive$AGE, gusto.dead$AGE)
+gusto.age.p.value
+
+#p-value for gender male: 1.4e-05
+gusto.gender.p.value.male <- t.test(gusto.alive$SEX == 0, gusto.dead$SEX == 0)
+gusto.gender.p.value.male
+
+#p-value for gender female: 1.4e-05
+gusto.gender.p.value.female <- t.test(gusto.alive$SEX == 1, gusto.dead$SEX == 1)
+gusto.gender.p.value.female
+
+
+#p-value for gender : 
+gender.p.value.g <- chisq.test(gusto_readmission$SEX, gusto_readmission$DAY30)
+gender.p.value.g 
+
+#p-value for group : 
+group.p.value.g <- chisq.test(gusto_readmission$GROUP, gusto_readmission$DAY30)
+group.p.value.g 
+
+
+```
+
+```{r}
+#Section 2 Q2
+
+#splitting dataset into training group with sample2, sample4, sample5
+gusto_readmission%>%
+  group_by(GROUP, DAY30) %>%
+  filter(GROUP == "sample2" | GROUP == "sample4" | GROUP == "sample5") %>%
+  select(GROUP, DAY30) %>%
+  summarise(count=n())%>%
+  mutate(summarise=sum(count))
+
+#splitting dataset into testing group with west 
+gusto_readmission%>%
+  group_by(GROUP, DAY30) %>%
+  filter(GROUP == "west") %>%
+  select(GROUP, DAY30) %>%
+  summarise(count=n())%>%
+  mutate(summarise=sum(count))
+
+
+```
+
+
+
+```{r}
+#Section2 Q3 
+train_data <- gusto_readmission%>%
+  filter(GROUP == "sample2" | GROUP == "sample4" | GROUP == "sample5")
+train_data
+
+train_data$DAY30 <- as.factor(train_data$DAY30)
+train_data$A65 <- as.factor(train_data$A65)
+train_data$SEX <- as.factor(train_data$SEX)
+train_data$KILLIP <- as.factor(train_data$KILLIP)
+train_data$SHO <- as.factor(train_data$SHO)
+train_data$DIA <- as.factor(train_data$DIA)
+train_data$HYP <- as.factor(train_data$HYP)
+train_data$HRT <- as.factor(train_data$HRT)
+train_data$ANT <- as.factor(train_data$ANT)
+train_data$PMI <- as.factor(train_data$PMI)
+train_data$HIG <- as.factor(train_data$HIG)
+train_data$SMK <- as.factor(train_data$SMK)
+train_data$HTN <- as.factor(train_data$HTN)
+train_data$LIP <- as.factor(train_data$LIP)
+train_data$PAN <- as.factor(train_data$PAN)
+train_data$FAM <- as.factor(train_data$FAM)
+train_data$STE <- as.factor(train_data$STE)
+train_data$ST4 <- as.factor(train_data$ST4)
+train_data$TTR <- as.factor(train_data$TTR)
+
+summary(train_data)
+
+test_data <- gusto_readmission%>%
+  filter(GROUP == "west")
+test_data
+
+
+test_data$DAY30 <- as.factor(test_data$DAY30)
+test_data$A65 <- as.factor(test_data$A65)
+test_data$SEX <- as.factor(test_data$SEX)
+test_data$KILLIP <- as.factor(test_data$KILLIP)
+test_data$SHO <- as.factor(test_data$SHO)
+test_data$DIA <- as.factor(test_data$DIA)
+test_data$HYP <- as.factor(test_data$HYP)
+test_data$HRT <- as.factor(test_data$HRT)
+test_data$ANT <- as.factor(test_data$ANT)
+test_data$PMI <- as.factor(test_data$PMI)
+test_data$HIG <- as.factor(test_data$HIG)
+test_data$SMK <- as.factor(test_data$SMK)
+test_data$HTN <- as.factor(test_data$HTN)
+test_data$LIP <- as.factor(test_data$LIP)
+test_data$PAN <- as.factor(test_data$PAN)
+test_data$FAM <- as.factor(test_data$FAM)
+test_data$STE <- as.factor(test_data$STE)
+test_data$ST4 <- as.factor(test_data$ST4)
+test_data$TTR <- as.factor(test_data$TTR)
+
+summary(test_data)  
+
+```
+
+```{r}
+write.csv(train_data, "~/Desktop/gusto_training.csv")
+write.csv(test_data, "~/Desktop/gusto_testing.csv")
+
+
+```
+
