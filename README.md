@@ -8,7 +8,7 @@ a) Creating and filling out Table 1
 b) Create subset of data from initial dataset
 c) Testing-training split from the subset (subset data is used for predictive modeling now on!) 
 
-2.  A medium sized patient laboratory values dataset  https://www.kaggle.com/c/gusto/data (challenges included vast number of columns along with numerical and variable formatting) 
+2. A medium sized patient laboratory values dataset  https://www.kaggle.com/c/gusto/data (challenges included vast number of columns along with numerical and variable formatting) 
 a) Creating and filling out Table 1
 b) Testing-training split of data
 c) Format continuous variables to categorical variables 
