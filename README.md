@@ -1,7 +1,6 @@
 # ML-Data-Cleaning
 
-
-This weekly project involved cleaning and formatting data for three Kaggle datasets in R: 
+This is the Data Cleaning week project for my Intermediate Applied Data Analysis class from the MscBMI Program at The University of Chicago tested on Linear Regression in R. The code for this repository elaborates on the specific code used to  clean data for three Kaggle datasets in R:
 
 1. A large patient readmission dataset https://inclass.kaggle.com/c/predicting-30-day-hospital-readmissions (challenges included an imbalanced dataset with messy data and missing values) 
 
